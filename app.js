@@ -16,7 +16,8 @@ const bot = new TelegramBot(telegramBotToken, { polling: true });
 // 날씨 정보를 가져오는 함수를 정의합니다.
 async function getWeather(city) {
   try {
-    const response = await axios.get(`http://api.weatherstack.com/current?access_key=${weatherstackApiKey}&query=${city}`);
+    // 추가한 파라미터 include에 'precip'를 추가하여 강수 정보를 가져옵니다.
+    const response = await axios.get(`http://api.weatherstack.com/current?access_key=${weatherstackApiKey}&query=${city}&include=precip`);
     const weatherData = response.data.current;
     return weatherData;
   } catch (error) {
@@ -50,9 +51,10 @@ bot.onText(/(.+)/, async (msg, match) => {
   if (koreanCities.includes(selectedCity)) {
     try {
       const weatherData = await getWeather(selectedCity);
-      bot.sendMessage(chatId, `${selectedCity}의 날씨 정보:\n온도: ${weatherData.temperature}°C\n습도: ${weatherData.humidity}%\n날씨: ${weatherData.weather_descriptions[0]}`);
+      // 추가한 강수 확률 정보를 포함하여 메시지를 보냅니다.
+      bot.sendMessage(chatId, `${selectedCity}의 날씨 정보:\n온도: ${weatherData.temperature}°C\n습도: ${weatherData.humidity}%\n날씨: ${weatherData.weather_descriptions[0]}\n강수 확률: ${weatherData.precip}%`);
     } catch (error) {
       bot.sendMessage(chatId, '날씨 정보를 가져오는 중 오류가 발생했습니다.');
     }
   }
-}); 
+});
